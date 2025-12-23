@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="kdash.jpeg" alt="Kdash Logo" width="600">
+  <img 
+    src="https://raw.githubusercontent.com/wedaa-tech/terraform-k8s-kdash/main/kdash.jpeg"
+    alt="Kdash Logo"
+    width="600"
+  />
 </p>
 
 <h1 align="center">Kdash - Terraform Kubernetes Dashboard Module</h1>
