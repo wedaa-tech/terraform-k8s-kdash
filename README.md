@@ -249,3 +249,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [Kubernetes Dashboard Official Documentation](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
 - [Kubernetes Dashboard GitHub Repository](https://github.com/kubernetes/dashboard)
 - [Kubernetes Dashboard Helm Chart](https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard)
+
