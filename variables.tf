@@ -12,6 +12,7 @@ variable "namespace" {
 
 variable "create_admin_token" {
   description = "Create admin token for auth"
+  type        = bool
   default     = true
 }
 

@@ -4,7 +4,7 @@ output "admin_token" {
 }
 
 output "admin_service_account" {
-  value = kubernetes_service_account_v1.admin_service_account[0].metadata[0].name
+  value = var.create_admin_token ? kubernetes_service_account_v1.admin_service_account[0].metadata[0].name : "Not enabled"
 }
 
 output "namespace" {

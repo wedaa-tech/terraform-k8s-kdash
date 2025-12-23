@@ -10,9 +10,8 @@ resource "kubernetes_namespace" "namespace" {
 }
 
 locals {
-  dashboard_chart                 = "kubernetes-dashboard"
-  dashboard_admin_service_account = "kubernetes-dashboard-admin"
-  dashboard_repository            = "https://kubernetes.github.io/dashboard/"
+  dashboard_chart      = "kubernetes-dashboard"
+  dashboard_repository = "https://kubernetes.github.io/dashboard/"
 }
 
 resource "helm_release" "dashboard" {
@@ -94,53 +93,10 @@ resource "helm_release" "dashboard" {
       value = set.value
     }
   }
-}
 
-
-
-
-
-
-# Admin Token
-resource "kubernetes_service_account_v1" "admin_service_account" {
-  count = var.create_admin_token ? 1 : 0
-
-  metadata {
-    name      = local.dashboard_admin_service_account
-    namespace = var.create_namespace ? kubernetes_namespace.namespace[0].id : var.namespace
+  # Skip login page for read-only access
+  set {
+    name  = "app.settings.global.skipLoginPage"
+    value = var.enable_skip_button
   }
-  automount_service_account_token = true
-}
-
-resource "kubernetes_cluster_role_binding" "admin_role_binding" {
-  count = var.create_admin_token ? 1 : 0
-
-  metadata {
-    name = local.dashboard_admin_service_account
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.admin_service_account[0].metadata[0].name
-    namespace = var.create_namespace ? kubernetes_namespace.namespace[0].id : var.namespace
-  }
-}
-
-resource "kubernetes_secret_v1" "admin_token" {
-  count = var.create_admin_token ? 1 : 0
-
-  metadata {
-    annotations = {
-      "kubernetes.io/service-account.name"      = kubernetes_service_account_v1.admin_service_account[0].metadata[0].name
-      "kubernetes.io/service-account.namespace" = var.create_namespace ? kubernetes_namespace.namespace[0].id : var.namespace
-    }
-    name      = "${kubernetes_service_account_v1.admin_service_account[0].metadata[0].name}-token"
-    namespace = var.create_namespace ? kubernetes_namespace.namespace[0].id : var.namespace
-  }
-
-  type = "kubernetes.io/service-account-token"
 }
