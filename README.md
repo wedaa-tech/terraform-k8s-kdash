@@ -66,7 +66,7 @@ Kdash simplifies the deployment of Kubernetes Dashboard by wrapping the official
 
 ```hcl
 module "kdash" {
-  source = "path/to/terraform-kdash"
+  source = "github.com/wedaa-tech/terraform-kdash"
 
   namespace            = "kubernetes-dashboard"
   create_namespace     = true
@@ -79,7 +79,7 @@ module "kdash" {
 
 ```hcl
 module "kdash" {
-  source = "path/to/terraform-kdash"
+  source = "github.com/wedaa-tech/terraform-kdash"
 
   # Namespace Configuration
   namespace        = "monitoring"
@@ -120,18 +120,11 @@ module "kdash" {
 
 ### Get Admin Token After Deployment
 
-```hcl
-# Output the token (use with caution - it's sensitive!)
-output "dashboard_token" {
-  value     = module.kdash.admin_token
-  sensitive = true
-}
+```bash
+kubectl get secret kdash-admin-token -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 -d
 ```
 
-To retrieve the token:
-```bash
-terraform output -raw dashboard_token
-```
+> **Note:** Replace `kubernetes-dashboard` with your configured namespace.
 
 ---
 
@@ -183,38 +176,30 @@ terraform output -raw dashboard_token
 
 ## Accessing the Dashboard
 
-### Method 1: Port Forward (Recommended for Development)
+### Step 1: Port Forward (Recommended for Development)
 
 ```bash
-# Get the namespace
-NAMESPACE=$(terraform output -raw namespace)
-
 # Port forward the Kong proxy service
-kubectl -n $NAMESPACE port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-
-# Access the dashboard
-# Open: https://localhost:8443
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ```
 
-### Method 2: Using the Admin Token
+> **Note:** Replace `kubernetes-dashboard` with your configured namespace.
 
-1. Get the token using Terraform:
-```bash
-terraform output -raw admin_token
-```
+Then open your browser and navigate to: **https://localhost:8443**
 
-Or directly via kubectl:
+### Step 2: Using the Admin Token
+
+1. Get the token:
 ```bash
 kubectl get secret kdash-admin-token -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 -d
 ```
+
+> **Note:** Replace `kubernetes-dashboard` with your configured namespace.
 
 2. Access the dashboard via port-forward (see above)
 
 3. Select "Token" authentication and paste the token
 
-### Method 3: NodePort / LoadBalancer
-
-Configure the Kong proxy service type in the Helm values for external access (not included in current module configuration).
 
 ---
 
@@ -236,6 +221,20 @@ terraform-kdash/
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### 🚧 Work in Progress
+
+This module currently exposes only a subset of the available Helm chart configurations. There are many more configurable options in the [values.yaml](values.yaml) that can be added as Terraform variables, including:
+
+- **Ingress settings** - Enable and configure ingress for external access
+- **Service type** - NodePort, LoadBalancer, ClusterIP configurations
+- **Resource limits** - CPU/Memory requests and limits for containers
+- **Security settings** - Pod security context, network policies
+- **Metrics scraper** - Enable/disable metrics collection
+- **Kong gateway** - Gateway configuration options
+- **Cert-manager** - TLS certificate management
+
+If you'd like to contribute by adding support for any of these configurations, we'd love your help! Check the `values.yaml` file for reference and feel free to open a PR.
 
 ---
 
